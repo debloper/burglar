@@ -12,7 +12,6 @@
 
   <!-- Link elements, including stylesheets -->
   <link rel="stylesheet"    href="//cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css" />
-  <link rel="stylesheet"    href="style.css" />
 
   <!-- Load scripts -->
   <script src="https://harvester.engineering.redhat.com/dataservice/resources/js/jquery-1.7.2.js"></script>
@@ -22,6 +21,34 @@
   <script src="https://harvester.engineering.redhat.com/dataservice/resources/js/ds-messages.js"></script>
 
   <script src="//cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+
+  <style type="text/css">
+
+    #content {
+      height: 400px;
+      margin-top: 2rem;
+    }
+
+    .container .right.menu {
+      margin: 8px 0;
+    }
+
+    .ui.right.rail {
+      font-size: 4rem;
+      text-align: right;
+      animation-duration: 3s;
+      animation-name: bounce;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-1rem); }
+      100% { transform: translateY(0); }
+    }
+
+  </style>
 
 </head>
 <body>
@@ -33,16 +60,17 @@
       <div class="item">
         Heist Harvester
       </div>
-      <div class="right menu" style="margin: 8px 0;">
+      <div class="right menu">
         <form class="ui form">
             <div class="field">
-              <div class="ui selection dropdown">
+              <div class="ui teal dropdown button">
                   <input type="hidden" name="template" id="template">
+                  <div class="default text">Select Dashboard</div>
                   <i class="dropdown icon"></i>
-                  <div class="default text">Choose Dashboard</div>
                   <div class="menu">
-                      <div class="item" data-value="1">RHEL 7</div>
-                      <div class="item" data-value="0">RHEL 6</div>
+                      <div class="item" data-value="Red Hat Enterprise Linux 7">RHEL 7</div>
+                      <div class="item" data-value="Red Hat Enterprise Linux 6">RHEL 6</div>
+                      <div class="item" data-value="Red Hat Enterprise Linux 5">RHEL 5</div>
                   </div>
               </div>
           </div>
@@ -52,14 +80,35 @@
   </div>
 
   <div id="container" class="ui container">
-    <div id="content" style="height: 400px;"></div>
+    <div id="content">
+
+      <div class="ui segment" style="border: none; box-shadow: none;">
+        <div class="ui right internal rail">
+          <i class="arrow up icon teal"></i>
+        </div>
+        <h1 class="ui center aligned icon header">
+          <i class="bug icon"></i>
+          <div class="content">
+            Select Dashboard
+            <div class="sub header">Choose a template to display.</div>
+          </div>
+        </h1>
+      </div>
+
+    </div>
   </div>
 
   <script type="text/javascript">
     $(".ui.dropdown").dropdown()
 
-    var client = new DsClient({reportdiv:"content"})
-    client.callAPI("https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?product=Red Hat Enterprise Linux 7&status=[NEW,MODIFIED,TOTAL_OPEN]", {"title":"RHEL 7", "series":[{"oldname":2,"type":"spline"}],"format":"column"})
+    $(".ui.dropdown input").on("change", function (e) {
+      var seed = $(this).val()
+        , url = "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?status=[NEW,MODIFIED,TOTAL_OPEN]&product=" + seed
+        , options = { "title": seed, "series": [{ "oldname": 2, "type": "spline" }], "format": "column" }
+        , client = new DsClient({reportdiv:"content"})
+
+      client.callAPI(url, options)
+    })
   </script>
 </body>
 </html>
