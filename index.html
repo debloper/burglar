@@ -48,6 +48,10 @@
       100% { transform: translateY(0); }
     }
 
+    .harvester-report-description-container {
+      display: none;
+    }
+
   </style>
 
 </head>
@@ -65,12 +69,11 @@
             <div class="field">
               <div class="ui teal dropdown button">
                   <input type="hidden" name="template" id="template">
-                  <div class="default text">Select Dashboard</div>
+                  <div class="default text">Select Component</div>
                   <i class="dropdown icon"></i>
                   <div class="menu">
-                      <div class="item" data-value="Red Hat Enterprise Linux 7">RHEL 7</div>
-                      <div class="item" data-value="Red Hat Enterprise Linux 6">RHEL 6</div>
-                      <div class="item" data-value="Red Hat Enterprise Linux 5">RHEL 5</div>
+                      <div class="item" data-value="distribute">Distribute</div>
+                      <div class="item" data-value="replicate">Replicate</div>
                   </div>
               </div>
           </div>
@@ -99,15 +102,46 @@
   </div>
 
   <script type="text/javascript">
+
+    var ore = [
+      {
+        label: "Open Issues",
+        url: "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?classification=[Community,Red Hat]&product=[GlusterFS,Red Hat Gluster Storage]&date=[interval:monthly,currentIncluded:true]&status=[NEW,ASSIGNED,POST,MODIFIED,ON_QA,TOTAL_OPEN]&security_only=false&customer=none&groupBy=status&detail=true"
+      },
+      {
+        label: "Open Issues with Customer Cases",
+        url: "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?classification=[Community,Red Hat]&product=[GlusterFS,Red Hat Gluster Storage]&date=[interval:monthly,currentIncluded:true]&status=[NEW,ASSIGNED,POST,MODIFIED,ON_QA,TOTAL_OPEN]&security_only=false&customer=external&groupBy=status&detail=true"
+      },
+      {
+        label: "Bug Trends",
+        url: "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?classification=[Community,Red Hat]&product=[GlusterFS,Red Hat Gluster Storage]&date=[interval:monthly,currentIncluded:true]&status=[NEW,ASSIGNED,POST,TOTAL_OPEN]&security_only=false&customer=none&detail=true"
+      },
+      {
+        label: "Bug Trends (post 2015/08)",
+        url: "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?classification=[Community,Red Hat]&product=[GlusterFS,Red Hat Gluster Storage]&date=[interval:monthly,from:2015-08,currentIncluded:true]&status=TOTAL_OPEN&security_only=false&customer=none&groupBy=[date,product]&detail=true"
+      },
+      {
+        label: "Bugs by Severity",
+        url: "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/severitydistribution?product=Red Hat Gluster Storage&status=[NEW,ASSIGNED,MODIFIED,ON_QA,POST]"
+      }
+    ]
+
     $(".ui.dropdown").dropdown()
 
     $(".ui.dropdown input").on("change", function (e) {
       var seed = $(this).val()
-        , url = "https://harvester.engineering.redhat.com/dataservice/api/bugzilla/bugtrend?status=[NEW,MODIFIED,TOTAL_OPEN]&product=" + seed
-        , options = { "title": seed, "series": [{ "oldname": 2, "type": "spline" }], "format": "column" }
-        , client = new DsClient({reportdiv:"content"})
 
-      client.callAPI(url, options)
+      $("#content").html("")
+
+      $.each(ore, function (index, item) {
+        $("#content" ).append("<div id='" + index + "'></div>")
+
+        var url = item.url + "&component=" + seed
+          , options = { "title": item.label, "series": [{ "oldname": 2, "type": "spline" }], "format": "column" }
+          , client = new DsClient({reportdiv:index.toString()})
+
+        client.callAPI(url, options)
+      })
     })
   </script>
 </body>
